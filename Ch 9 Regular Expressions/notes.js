@@ -25,9 +25,9 @@ console.log(/[0-9]/.test("in 1992"));
 // \d	Any digit character
 // \w	An alphanumeric character(“word character”)
 // \s	Any whitespace character(space, tab, newline, and similar)
-// \D	A character that is not a digit
 // \W	A non-alphanumeric character
 // \S	A non-whitespace character
+// \D	A character that is not a digit
 // . Any character except for newline
 
 // To invert a set of characters—that is, to express that you want to match any character 
@@ -261,10 +261,101 @@ let stock = "1 lemon, 2 cabbages, and 101 eggs"; function minusOne(match, amount
     unit = unit.slice(0, unit.length - 1);
   } else if (amount == 0) {
     amount = "no";
-  }
+  };
   return amount + " " + unit;
-}
+};
 console.log(stock.replace(/(\d+) (\w+)/g, minusOne)); // → no lemon, 1 cabbage, and 100 eggs
 
+// Greedy symbols:
+
+// in REGEX you can remove comments from code:
+
+function stripComments(code){
+  return code.replace(/\/\/.*|\/\*[^]*\*\//g, "");
+};
+
+// /\/\/.*
+// this portion looks for double forward slashes // followed by 
+// any character pattern repeated any number of times, except for new lines.
+/*
+\/\*[^]*\*\//g
+this portion first looks for a forward slash followed by a start. 
+[^]* looks for any characters that are NOT empty characters with the star saying 
+the pattern can appear many times. 
+finally we close the block commet with \*\/  
+we also end the expression with the global (g) flag 
+to find every instance of a pattern
+/*/
+console.log(stripComments("1 + /* 2 */3"));
+// the function removes the comments and the text inside the comments
+// => 1 + 3
+
+console.log(stripComments("x = 10;// ten!"));
+// → x = 10;
+console.log(stripComments("1 /* a */+/* b */ 1")); 
+// → 1 1
+// The above output replaces removes the +, because 
+// of [^]* this expression relies on backtracking until it finds a match
+// the + is the first match, so it replaces it with ""
+
+// Within REGEX the (+, *, ? and {}) operators are considered greedy in that
+// they match as much as they can and backtrack from there. 
+
+// To reverse this and make it non-greedy you can post-fix 
+// a ? to each of them (+?, *?, ?? and {}?)
+
+// This will cause them to match as little as possible
+// matching more when the remaining pattern does not fit the 
+// smaller match. 
+
+function nonGreedyStripComments(code) {
+  return code.replace(/\/\/.*|\/\*[^]*\*\//g, "");
+};
+
+console.log(stripComments("1 /* a */+/* b */ 1"));
+// => 1 + 1
+
+// Dynamically creating REGEX
+
+// When the programmer does not a specific pattern to match
+// using the REGEX constructor you can pass in variables to dynamically create REGEX 
+// objects.
 
 
+// For example, finding a user's name in a string of text to dynamically replace it. 
+let name = "matt";
+let text = "Matt loves Vaporwave, Matt also loves Warhammer & Warhammer 40k";
+const reg = new RegExp("\\b(" + name + ")\\b", "gi");
+// the double slash is used for he \b because it is a string literal not a regexp
+// so we must escape the backslash. 
+// => /\b(matt)\b/gi
+
+let replacedText = text.replace(reg, "_$1_");
+// => '_Matt_ loves Vaporwave, _Matt_ also loves Warhammer & Warhammer 40k'
+
+// Special conditions:
+
+let name = "dea+hl[]rd";
+let text = "This dea+hl[]rd guy is super annoying.";
+// using the previous REGEX we DO NOT get the desired results:
+const reg = new RegExp("\\b(" + name + ")\\b", "gi");
+let replacedText = text.replace(reg, "_$1_");
+// => 'This dea+hl[]rd guy is super annoying.'
+
+// To solve this problem we can denote important characters with a backslash
+let escaped = name.replace(/[\\[.+*?(){|^$]/g, "\\$&");
+// => 'dea\\+hl\\[]rd'
+let regexp = new RegExp("\\b"+ escaped +"\\b", "gi");
+console.log(text.replace(regexp, "_$&_"))
+// => This _dea+hl[]rd_ guy is super annoying.
+
+// THE SEARCH METHOD:
+
+// the indexOf method CANNOT take a REGEX to find the index of a paticular pattern
+// the search method CAN and EXPECTS a REGEX to find the first index of a pattern.
+// \S	A non-whitespace character
+console.log("  word".search(/\S/));
+// => 2
+console.log("       ".search(/\S/));
+// NO MATCH FOUND
+// => -1
