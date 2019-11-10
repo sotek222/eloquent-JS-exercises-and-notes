@@ -359,3 +359,130 @@ console.log("  word".search(/\S/));
 console.log("       ".search(/\S/));
 // NO MATCH FOUND
 // => -1
+
+// There is no way to set where in the string the search method should start from.
+
+// lastIndex PROPERTY:
+// The exec method provides an inconvenient way to set where in the string to start 
+// searching from
+
+// REGEX objects have a lastIndex property which under certain circumstances 
+// controls where and the exec method starts from.
+
+// When using the y (sticky) and g (global) flags the lastIndex property is used in the exec method.
+
+let pattern = /y/g;
+pattern.lastIndex = 3;
+let match = pattern.exec("xyzzy");
+console.log(match.index);
+// => 4
+console.log(pattern.lastIndex);
+// => 5
+// If the match was succesful the exec method automatically updates the lastIndex 
+// property
+// If no match is found it sets the lastIndex property to 0;
+
+// The difference between global and sticky options is that, when sticky is enabled
+// the atch will only succeed if it starts directly at lastIndex
+// Global will look ahead for a posiiton where a match can start.
+
+let global = /abc/g;
+console.log(global.exec("xyz abc"));
+// => ["abc"]
+let sticky = /abc/y;
+// at this point sticky.lastIndex = 0;
+console.log(sticky.exec("xyz abc"));
+// => null
+
+// The danger when using the same REGEX object for multiple exec calls on different patterns
+// is the lastIndex has been updated which can effect the output
+let digit = /\d/g;
+console.log(digit.exec("here it is: 1"));
+// => ["1"]
+// digit.lastIndex = 13;
+console.log(digit.exec("and now: 2"));
+// => null
+
+// Global flags also change the way the match method
+// works on strings. 
+// When called with the g flag, instead of returning an array similar to 
+// that return by exec method.
+// match will instead return all the matches of the pattern in the string 
+// and return it as an array of the matches.
+
+console.log("Banana".match(/an/g));
+// => ["an", "an"];
+
+// BE CAREFUL when using the global flag
+// They are typically used in calls to replace and 
+// places where the use of lastIndex is explicitly needed. 
+
+// Looping over Matches:
+// It is common to scan through all occurences of a pattern
+// in a string in a way that gives us access to the match obect in 
+// the loop block
+// This is done with the exec method and the lastIndex property
+
+let input = "A string with 3 numbers in it... 42 and 88";
+let number = /\b\d+\b/g;
+let match;
+
+while (match = number.exec(input)){
+  // the above condition will return true as long a match is found.
+  console.log("Found", match[0], "at", match.index);
+};
+
+// => Found 3 at 14
+// => Found 42 at 33
+// => Found 88 at 40
+
+
+// Parsing an INI File:
+
+// INI files are a type of widely used config file
+// the format for this type of file is as follows:
+
+// - Blank lines & lines starting with semi-colons are ignored
+// - Words wrapped in [] start a new section
+// - Lines containing an alphanumeric identifier followed by an = character 
+// add a setting to the current section.
+// - anything else is invalid
+
+// example:
+
+
+// searchengine = https://duckduckgo.com/?q=$1
+// spitefulness = 9.7
+
+// ; comments are preceded by a semicolon...
+// ; each section concerns an individual enemy
+// [larry]
+// fullname = Larry Doe
+// type = kindergarten bully
+// website = http://www.geocities.com/CapeCanaveral/11451
+// [davaeorn]
+// fullname = Davaeorn
+// type = evil wizard
+// outputdir = /home/marijn / enemies / davaeorn
+
+function parseINI(string){
+  // Start with an object to holf the top-level
+  const result = {};
+  let section = result;
+  // below we split the input string on 
+  // newlines (\n)
+  // and a carriage return character
+  // which only appears sometimes 
+  // (\r?)
+  string.split(/\r?\n/).forEach(line => {
+    let match;
+    if(match = line.match(/^\[(\w+)=(.*)]$/)){
+      section[match[1]] = match[2];
+    } else if(null){
+
+    } else if(null){
+
+    }
+  });
+
+};
